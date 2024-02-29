@@ -9,8 +9,8 @@ import (
 
 // PublishEvent implements port.CustomerUsecase.
 func (*customerUsecase) PublishEvent(h model.UsecaseHandlerFunc) model.UsecaseHandlerFunc {
-	return func(ctx context.Context, in interface{}, opts ...interface{}) (interface{}, error) {
-		out, err := h(ctx, in, opts...)
+	return func(ctx context.Context, in any, opts any) (any, error) {
+		out, err := h(ctx, in, opts)
 
 		log.SetPrefix("port.CustomerUsecase.PublishEvent\t")
 		if err != nil {

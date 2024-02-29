@@ -10,15 +10,16 @@ import (
 
 func Test_PublishEvent(t *testing.T) {
 	type args struct {
-		ctx context.Context
-		in  interface{}
+		ctx  context.Context
+		in   any
+		opts any
 	}
 
 	tests := []struct {
 		name string
 		h    model.UsecaseHandlerFunc
 		args args
-		out  interface{}
+		out  any
 		err  error
 	}{}
 
@@ -27,7 +28,7 @@ func Test_PublishEvent(t *testing.T) {
 			usecase := NewUsecase()
 
 			handler := usecase.GetCustomerUsecase().PublishEvent(tt.h)
-			out, err := handler(tt.args.ctx, tt.args.in)
+			out, err := handler(tt.args.ctx, tt.args.in, tt.args.opts)
 
 			assert.Equal(t, tt.out, out)
 			assert.Equal(t, tt.err, err)

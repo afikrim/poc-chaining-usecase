@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -19,32 +20,29 @@ func (u *usecases) GetCustomerUsecase() port.CustomerUsecase {
 }
 
 // GetCustomer implements port.CustomerUsecase.
-func (c *customerUsecase) GetCustomer(ctx context.Context, in *model.GetCustomerIn, opts ...customeroption.Option) (*model.GetCustomerOut, error) {
-	o := customeroption.NewOptions(opts...)
+func (c *customerUsecase) GetCustomer(ctx context.Context, in any, opts any) (any, error) {
+	log.SetPrefix("port.CustomerUsecase.GetCustomer\t")
 
-	// use grpc approach when passing a handler to the chaining method
-	f := func(_ context.Context, _ interface{}, _ ...interface{}) (interface{}, error) {
-		log.SetPrefix("port.CustomerUsecase.GetCustomer\t")
-
-		if prefix, ok := ctx.Value("prefix").(string); ok {
-			log.Printf("prefix is setted, %s", prefix)
-			in.ID = fmt.Sprintf("%s-%s", prefix, in.ID)
-		}
-
-		log.Printf("return customer, %s", in.ID)
-		return &model.GetCustomerOut{
-			ID:   in.ID,
-			Name: fmt.Sprintf("Dummy: %s", in.ID),
-		}, nil
+	getCustomerIn, ok := in.(*model.GetCustomerIn)
+	if !ok {
+		log.Printf("input is not a valid type")
+		return nil, errors.New("input is not a valid type")
 	}
 
-	// chaining handler
-	h := c.ucs.ChainHandler(f, o.Middlewares...)
-
-	out, err := h(ctx, in, opts)
-	if err != nil {
-
+	_, ok = opts.([]customeroption.Option)
+	if opts != nil && !ok {
+		log.Printf("option is not a valid type")
+		return nil, errors.New("option is not a valid type")
 	}
 
-	return out.(*model.GetCustomerOut), err
+	if prefix, ok := ctx.Value("prefix").(string); ok {
+		log.Printf("prefix is setted, %s", prefix)
+		getCustomerIn.ID = fmt.Sprintf("%s-%s", prefix, getCustomerIn.ID)
+	}
+
+	log.Printf("return customer, %s", getCustomerIn.ID)
+	return &model.GetCustomerOut{
+		ID:   getCustomerIn.ID,
+		Name: fmt.Sprintf("Dummy: %s", getCustomerIn.ID),
+	}, nil
 }

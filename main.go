@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"bitbucket.org/Amartha/poc-chaining-usecase/model"
-	customeroption "bitbucket.org/Amartha/poc-chaining-usecase/model/customer"
 	"bitbucket.org/Amartha/poc-chaining-usecase/usecase"
 )
 
@@ -17,18 +16,27 @@ func main() {
 	publishEventMiddleware := usecase.GetCustomerUsecase().PublishEvent
 
 	// directly call get customer without any middleware
-	out, err := getCustomerHandler(context.Background(), &model.GetCustomerIn{ID: "123091283"})
+	h := usecase.ChainHandler(getCustomerHandler)
+	out, err := h(context.Background(), &model.GetCustomerIn{ID: "123091283"}, nil)
 	fmt.Println(err)
 	fmt.Println(out)
 
 	// use check x sot middleware
 	ctx := context.WithValue(context.Background(), "x-sot", "customer")
-	out, err = getCustomerHandler(ctx, &model.GetCustomerIn{ID: "123091283"}, customeroption.WithMiddleware(checkXSotMiddleware))
+	h = usecase.ChainHandler(getCustomerHandler, checkXSotMiddleware)
+	out, err = h(ctx, &model.GetCustomerIn{ID: "123091283"}, nil)
 	fmt.Println(err)
 	fmt.Println(out)
 
 	// use check x sot middleware and publish event middleware
-	out, err = getCustomerHandler(context.Background(), &model.GetCustomerIn{ID: "123091283"}, customeroption.WithMiddleware(checkXSotMiddleware), customeroption.WithMiddleware(publishEventMiddleware))
+	h = usecase.ChainHandler(getCustomerHandler, checkXSotMiddleware, publishEventMiddleware)
+	out, err = h(ctx, &model.GetCustomerIn{ID: "123091283"}, nil)
+	fmt.Println(err)
+	fmt.Println(out)
+
+	// use invalid input
+	h = usecase.ChainHandler(getCustomerHandler, checkXSotMiddleware)
+	out, err = h(ctx, struct{}{}, nil)
 	fmt.Println(err)
 	fmt.Println(out)
 }
