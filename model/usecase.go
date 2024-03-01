@@ -1,6 +1,12 @@
 package model
 
-import "context"
+import (
+	"context"
+)
 
-type UsecaseHandlerFunc func(ctx context.Context, in any, opts any) (out any, err error)
-type UsecaseMiddlewareFunc func(h UsecaseHandlerFunc) UsecaseHandlerFunc
+type UsecaseInfo struct {
+	Uc any
+}
+
+type UsecaseHandlerFunc[Input, Output any] func(ctx context.Context, in Input) (Output, error)
+type UsecaseMiddlewareFunc[Input, Output any] func(ctx context.Context, in Input, info *UsecaseInfo, handler UsecaseHandlerFunc[Input, Output]) (Output, error)

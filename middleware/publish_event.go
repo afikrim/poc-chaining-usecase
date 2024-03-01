@@ -1,4 +1,4 @@
-package usecase
+package middleware
 
 import (
 	"context"
@@ -7,10 +7,9 @@ import (
 	"bitbucket.org/Amartha/poc-chaining-usecase/model"
 )
 
-// PublishEvent implements port.CustomerUsecase.
-func (*customerUsecase) PublishEvent(h model.UsecaseHandlerFunc) model.UsecaseHandlerFunc {
-	return func(ctx context.Context, in any, opts any) (any, error) {
-		out, err := h(ctx, in, opts)
+func PublishEvent[Input, Output any]() model.UsecaseMiddlewareFunc[Input, Output] {
+	return func(ctx context.Context, in Input, info *model.UsecaseInfo, handler model.UsecaseHandlerFunc[Input, Output]) (Output, error) {
+		out, err := handler(ctx, in)
 
 		log.SetPrefix("port.CustomerUsecase.PublishEvent\t")
 		if err != nil {

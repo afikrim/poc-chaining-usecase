@@ -10,15 +10,14 @@ import (
 
 func Test_GetCustomer(t *testing.T) {
 	type args struct {
-		ctx  context.Context
-		in   any
-		opts any
+		ctx context.Context
+		in  *model.GetCustomerIn
 	}
 
 	tests := []struct {
 		name string
 		args args
-		out  any
+		out  *model.GetCustomerOut
 		err  error
 	}{
 		{
@@ -34,7 +33,7 @@ func Test_GetCustomer(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			usecase := NewUsecase()
 
-			out, err := usecase.GetCustomerUsecase().GetCustomer(tt.args.ctx, tt.args.in, tt.args.opts)
+			out, err := usecase.GetCustomerUsecase().GetCustomer(tt.args.ctx, tt.args.in)
 			assert.Equal(t, tt.err, err)
 			assert.Equal(t, tt.out, out)
 		})
